@@ -1,11 +1,11 @@
 // DOM glue: drawing, input and the game loop.
 (function () {
-  var STEP_MS = 150;
   var MAX_QUEUE = 2;      // turns remembered between steps
   var SWIPE_MIN_PX = 20;  // shorter finger moves are ignored
 
   var canvas = document.getElementById("board");
   var ctx = canvas.getContext("2d");
+  var scoreEl = document.getElementById("score");
   var state = Snake.createState();
   var queue = [];
   var paused = false;
@@ -23,6 +23,19 @@
     ctx.fillStyle = cssVar("--board");
     ctx.fillRect(0, 0, size, size);
 
+    if (state.food) {
+      ctx.fillStyle = cssVar("--food");
+      ctx.beginPath();
+      ctx.arc(
+        (state.food.x + 0.5) * cell,
+        (state.food.y + 0.5) * cell,
+        cell * 0.38,
+        0,
+        Math.PI * 2
+      );
+      ctx.fill();
+    }
+
     state.snake.forEach(function (part, i) {
       ctx.fillStyle = i === 0 ? cssVar("--snake-head") : cssVar("--snake");
       ctx.fillRect(part.x * cell + 1, part.y * cell + 1, cell - 2, cell - 2);
@@ -37,6 +50,8 @@
       ctx.textBaseline = "middle";
       ctx.fillText("Paused", size / 2, size / 2);
     }
+
+    scoreEl.textContent = state.score;
   }
 
   // ---- Input ----
@@ -108,12 +123,17 @@
 
   // ---- Loop ----
 
-  setInterval(function () {
-    if (paused) return;
-    if (queue.length) state = Snake.turn(state, queue.shift());
-    state = Snake.step(state);
-    draw();
-  }, STEP_MS);
+  // setTimeout instead of setInterval so the speed can change as the
+  // snake eats.
+  function tick() {
+    if (!paused) {
+      if (queue.length) state = Snake.turn(state, queue.shift());
+      state = Snake.step(state);
+      draw();
+    }
+    setTimeout(tick, Snake.stepMs(state.eaten));
+  }
 
   draw();
+  setTimeout(tick, Snake.stepMs(state.eaten));
 })();

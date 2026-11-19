@@ -4,6 +4,7 @@
   --board: #16301f;
   --snake: #5cc97a;
   --snake-head: #b6f2c4;
+  --food: #f2a541;
   --overlay: rgba(15, 31, 23, 0.7);
   --button: #24472f;
   --button-active: #3a6b4a;
@@ -42,6 +43,25 @@ h1 {
   margin: 0;
   font-size: 1.5rem;
   letter-spacing: 0.05em;
+}
+
+.hud {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  width: min(90vw, 70vh, 480px);
+}
+
+.score {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--muted);
+}
+
+.score span {
+  color: var(--text);
+  font-weight: bold;
+  font-variant-numeric: tabular-nums;
 }
 
 #board {
