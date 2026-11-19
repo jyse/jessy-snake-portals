@@ -9,6 +9,12 @@ var Snake = (function () {
     right: { x: 1, y: 0 }
   };
 
+  var OPPOSITE = { up: "down", down: "up", left: "right", right: "left" };
+
+  function isOpposite(a, b) {
+    return OPPOSITE[a] === b;
+  }
+
   function createState() {
     return {
       grid: GRID,
@@ -23,6 +29,16 @@ var Snake = (function () {
 
   function inBounds(cell, grid) {
     return cell.x >= 0 && cell.y >= 0 && cell.x < grid && cell.y < grid;
+  }
+
+  // Returns a state heading in the new direction. Unknown directions,
+  // the same direction, and reversing straight back into the body are
+  // ignored (the original state is returned).
+  function turn(state, dir) {
+    if (!DIRS[dir] || dir === state.dir || isOpposite(dir, state.dir)) {
+      return state;
+    }
+    return { grid: state.grid, dir: dir, snake: state.snake };
   }
 
   // Returns a new state one step later. The input state is not changed.
@@ -44,7 +60,14 @@ var Snake = (function () {
     };
   }
 
-  return { GRID: GRID, DIRS: DIRS, createState: createState, step: step };
+  return {
+    GRID: GRID,
+    DIRS: DIRS,
+    isOpposite: isOpposite,
+    createState: createState,
+    turn: turn,
+    step: step
+  };
 })();
 
 if (typeof module !== "undefined") module.exports = Snake;

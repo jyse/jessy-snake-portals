@@ -4,6 +4,10 @@
   --board: #16301f;
   --snake: #5cc97a;
   --snake-head: #b6f2c4;
+  --overlay: rgba(15, 31, 23, 0.7);
+  --button: #24472f;
+  --button-active: #3a6b4a;
+  --muted: #9bb8a4;
 }
 
 * {
@@ -46,4 +50,53 @@ h1 {
   aspect-ratio: 1;
   border-radius: 8px;
   image-rendering: pixelated;
+  touch-action: none; /* swipes steer the snake instead of scrolling */
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* Direction pad: hidden on mouse/keyboard devices, shown on touch screens. */
+.pad {
+  display: none;
+  grid-template-columns: repeat(3, 64px);
+  grid-template-rows: repeat(2, 64px);
+  grid-template-areas:
+    ".    up    ."
+    "left down  right";
+  gap: 8px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.pad button {
+  border: 0;
+  border-radius: 12px;
+  background: var(--button);
+  color: var(--text);
+  font-size: 1.5rem;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pad button:active {
+  background: var(--button-active);
+}
+
+.pad .up { grid-area: up; }
+.pad .down { grid-area: down; }
+.pad .left { grid-area: left; }
+.pad .right { grid-area: right; }
+
+@media (pointer: coarse) {
+  .pad {
+    display: grid;
+  }
+
+  .hint {
+    display: none;
+  }
 }
