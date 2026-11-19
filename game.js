@@ -2,10 +2,12 @@
 var Snake = (function () {
   var GRID = 20;
 
-  var BASE_STEP_MS = 150;   // starting speed (time between steps)
-  var MIN_STEP_MS = 70;     // fastest allowed
-  var SPEEDUP_EVERY = 5;    // foods eaten per speed-up
-  var SPEEDUP_MS = 10;      // how much faster each speed-up is
+  // Speed: start at BASE_MS per step, get SPEEDUP_MS faster every
+  // SPEEDUP_EVERY pieces of food, never faster than MIN_MS.
+  var BASE_MS = 150;
+  var SPEEDUP_EVERY = 5;
+  var SPEEDUP_MS = 10;
+  var MIN_MS = 70;
 
   var DIRS = {
     up: { x: 0, y: -1 },
@@ -20,32 +22,26 @@ var Snake = (function () {
     return OPPOSITE[a] === b;
   }
 
-  // Copy a state and change some fields, leaving the original untouched.
-  function withChanges(state, changes) {
-    return Object.assign({}, state, changes);
+  function sameCell(a, b) {
+    return a.x === b.x && a.y === b.y;
   }
 
-  // Pick a random cell that the snake is not on. Returns null if the board
-  // is full. `rand` returns a number in [0, 1); tests pass their own.
+  // Picks a random empty cell for the food. `rand` returns a number in
+  // [0, 1) like Math.random; tests pass their own. Returns null if the
+  // snake fills the whole board.
   function spawnFood(snake, grid, rand) {
     rand = rand || Math.random;
-    var taken = {};
-    snake.forEach(function (c) { taken[c.x + "," + c.y] = true; });
-
-    var free = [];
+    var empty = [];
     for (var y = 0; y < grid; y++) {
       for (var x = 0; x < grid; x++) {
-        if (!taken[x + "," + y]) free.push({ x: x, y: y });
+        var cell = { x: x, y: y };
+        if (!snake.some(function (part) { return sameCell(part, cell); })) {
+          empty.push(cell);
+        }
       }
     }
-    if (!free.length) return null;
-    return free[Math.floor(rand() * free.length)];
-  }
-
-  // Time between steps for a given number of foods eaten.
-  function stepMs(eaten) {
-    var ms = BASE_STEP_MS - Math.floor(eaten / SPEEDUP_EVERY) * SPEEDUP_MS;
-    return Math.max(MIN_STEP_MS, ms);
+    if (empty.length === 0) return null;
+    return empty[Math.floor(rand() * empty.length)];
   }
 
   function createState(rand) {
@@ -59,8 +55,7 @@ var Snake = (function () {
       dir: "right",
       snake: snake,
       food: spawnFood(snake, GRID, rand),
-      score: 0,
-      eaten: 0
+      score: 0
     };
   }
 
@@ -68,8 +63,10 @@ var Snake = (function () {
     return cell.x >= 0 && cell.y >= 0 && cell.x < grid && cell.y < grid;
   }
 
-  function sameCell(a, b) {
-    return !!a && !!b && a.x === b.x && a.y === b.y;
+  // How long one step lasts, in milliseconds, for a given score.
+  function stepMs(score) {
+    var faster = Math.floor(score / SPEEDUP_EVERY) * SPEEDUP_MS;
+    return Math.max(MIN_MS, BASE_MS - faster);
   }
 
   // Returns a state heading in the new direction. Unknown directions,
@@ -79,11 +76,11 @@ var Snake = (function () {
     if (!DIRS[dir] || dir === state.dir || isOpposite(dir, state.dir)) {
       return state;
     }
-    return withChanges(state, { dir: dir });
+    return Object.assign({}, state, { dir: dir });
   }
 
   // Returns a new state one step later. The input state is not changed.
-  // Eating food grows the snake by one and adds to the score.
+  // Eating the food grows the snake by one and adds one to the score.
   // Layer 1-3: leaving the board just restarts the game.
   function step(state, rand) {
     var d = DIRS[state.dir];
@@ -94,30 +91,31 @@ var Snake = (function () {
       return createState(rand);
     }
 
-    if (sameCell(next, state.food)) {
+    var eats = state.food !== null && sameCell(next, state.food);
+
+    if (eats) {
       var grown = [next].concat(state.snake);
-      return withChanges(state, {
+      return Object.assign({}, state, {
         snake: grown,
         food: spawnFood(grown, state.grid, rand),
-        score: state.score + 1,
-        eaten: state.eaten + 1
+        score: state.score + 1
       });
     }
 
-    return withChanges(state, {
+    return Object.assign({}, state, {
       snake: [next].concat(state.snake.slice(0, -1))
     });
   }
 
   return {
     GRID: GRID,
-    BASE_STEP_MS: BASE_STEP_MS,
-    MIN_STEP_MS: MIN_STEP_MS,
+    BASE_MS: BASE_MS,
+    MIN_MS: MIN_MS,
     DIRS: DIRS,
     isOpposite: isOpposite,
     spawnFood: spawnFood,
-    stepMs: stepMs,
     createState: createState,
+    stepMs: stepMs,
     turn: turn,
     step: step
   };

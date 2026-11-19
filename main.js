@@ -123,17 +123,17 @@
 
   // ---- Loop ----
 
-  // setTimeout instead of setInterval so the speed can change as the
-  // snake eats.
+  // setTimeout instead of setInterval so each step can use the current
+  // speed, which gets faster as the score goes up.
   function tick() {
     if (!paused) {
       if (queue.length) state = Snake.turn(state, queue.shift());
       state = Snake.step(state);
       draw();
     }
-    setTimeout(tick, Snake.stepMs(state.eaten));
+    setTimeout(tick, Snake.stepMs(state.score));
   }
 
   draw();
-  setTimeout(tick, Snake.stepMs(state.eaten));
+  setTimeout(tick, Snake.stepMs(state.score));
 })();

@@ -4,7 +4,7 @@
   --board: #16301f;
   --snake: #5cc97a;
   --snake-head: #b6f2c4;
-  --food: #f2a541;
+  --food: #f2a65a;
   --overlay: rgba(15, 31, 23, 0.7);
   --button: #24472f;
   --button-active: #3a6b4a;
@@ -45,25 +45,6 @@ h1 {
   letter-spacing: 0.05em;
 }
 
-.hud {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  width: min(90vw, 70vh, 480px);
-}
-
-.score {
-  margin: 0;
-  font-size: 1.1rem;
-  color: var(--muted);
-}
-
-.score span {
-  color: var(--text);
-  font-weight: bold;
-  font-variant-numeric: tabular-nums;
-}
-
 #board {
   width: min(90vw, 70vh, 480px);
   height: auto;
@@ -71,6 +52,17 @@ h1 {
   border-radius: 8px;
   image-rendering: pixelated;
   touch-action: none; /* swipes steer the snake instead of scrolling */
+}
+
+.hud {
+  margin: 0;
+  font-size: 1.1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.hud span {
+  font-weight: bold;
+  color: var(--food);
 }
 
 .hint {
