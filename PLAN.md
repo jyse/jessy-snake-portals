@@ -17,6 +17,8 @@ you can open and check in about 10 seconds. Build one layer at a time.
 | L3a | Level 3: food goal 11 | Done (branch `level-3`) |
 | L3b | Level 3: snake starts 5 long, 140 ms | Done (branch `level-3`) |
 | L3c | Level 3: 24 obstacle squares | Done (branch `level-3`) |
+| L4 | Level 4: 14 food, 6 long, 120 ms, 32 obstacle squares | Done (branch `build-levels-up-to-5`) |
+| L5 | Level 5: 17 food, 7 long, 110 ms, 36 obstacle squares | Done (branch `build-levels-up-to-5`) |
 
 ## File layout
 ```
@@ -45,15 +47,21 @@ tests/game.test.js   unit tests for game.js using Node's built-in test runner
 - **Board:** fixed 20×20 grid, scaled to fit the screen. Dark green theme with
   our own colours.
 - **Reset:** a small "Reset best score" link on the start screen
-- **Levels (so far):** level 1 needs 5 food, level 2 needs 8, level 3 needs 11. Level 1's
-  snake starts 3 long, level 2's 4 long, level 3's 5 long (head in the same place). Level 2 starts at 140 ms per step, level 3 at 130 (level 1 stays 150).
+- **Levels (so far):** level 1 needs 5 food, level 2 needs 8, level 3 needs 11, level 4
+  needs 14, level 5 needs 17. Level 1's snake starts 3 long, then 4, 5, 6 and 7 long; the
+  head stays at x=5 on row 10, except level 5, where it moves to x=6 so 7 squares fit on
+  the board. Level 2 starts at 140 ms per step, level 3 at 130, level 4 at 120, level 5 at
+  110 (level 1 stays 150).
   Level 1 has no obstacles; level 2 has four 2×2 grey blocks, one per
   quarter, kept off the walls, each other and the snake's row so every free
   square stays reachable. Level 3 adds two more 2×2 blocks in the middle
-  columns, top and bottom: six blocks, 24 squares. The food counts
+  columns, top and bottom: six blocks, 24 squares. Level 4 adds two blocks on
+  rows 8–9 (x=4–5 and x=14–15): 32 squares. Level 5 adds the last safe spot,
+  rows 8–9 at x=9–10: 36 squares (no other place keeps 2 free squares to
+  walls and blocks). The food counts
   per level; the score carries over. A new level starts on a fresh board (the
   snake goes back to its start). After the last level's goal you keep playing.
-  No "Level 2!" message yet. Still open: levels 4 and 5, a win screen.
+  No "Level 2!" message yet. Still open: a win screen.
 
 ---
 

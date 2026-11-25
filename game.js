@@ -9,9 +9,11 @@ var Snake = (function () {
     ? [
         require("./levels/level-1.js"),
         require("./levels/level-2.js"),
-        require("./levels/level-3.js")
+        require("./levels/level-3.js"),
+        require("./levels/level-4.js"),
+        require("./levels/level-5.js")
       ]
-    : [SnakeLevel1, SnakeLevel2, SnakeLevel3];
+    : [SnakeLevel1, SnakeLevel2, SnakeLevel3, SnakeLevel4, SnakeLevel5];
 
   // Returns the level with this number, or level 1 if there is none.
   function getLevel(number) {
