@@ -11,6 +11,9 @@ you can open and check in about 10 seconds. Build one layer at a time.
 | 3 | Food and score | Done |
 | 4 | Game over | Built, not committed yet |
 | 5 | Your style (nickname and avatar) | To do |
+| L2 | Levels: level files, level 2, `?level=N` | Done (branch `level-2`) |
+| L2b | Level 2: snake starts 4 long | Done (branch `level-2`) |
+| L2c | Level 2: obstacles | Done (branch `level-2`) |
 
 ## File layout
 ```
@@ -18,6 +21,7 @@ index.html      page structure: start screen, board, touch buttons, game-over sc
 style.css       look and layout, fits phone and laptop
 game.js         pure game logic (no DOM): state, step, turn, food, collisions, speed
 main.js         DOM glue: drawing on <canvas>, input, screens, localStorage
+levels/level-N.js   one level's numbers: food goal, start snake, speed
 package.json    only "test": "node --test tests/*.test.js", no dependencies
 tests/game.test.js   unit tests for game.js using Node's built-in test runner
 ```
@@ -37,6 +41,14 @@ tests/game.test.js   unit tests for game.js using Node's built-in test runner
 - **Board:** fixed 20×20 grid, scaled to fit the screen. Dark green theme with
   our own colours.
 - **Reset:** a small "Reset best score" link on the start screen
+- **Levels (so far):** level 1 needs 5 food, level 2 needs 8. Level 1's
+  snake starts 3 long, level 2's starts 4 long (head in the same place).
+  Level 1 has no obstacles; level 2 has four 2×2 grey blocks, one per
+  quarter, kept off the walls, each other and the snake's row so every free
+  square stays reachable. The food counts
+  per level; the score carries over. A new level starts on a fresh board (the
+  snake goes back to its start). After the last level's goal you keep playing.
+  No "Level 2!" message yet. Still open: obstacles, levels 3 to 5, a win screen.
 
 ---
 
@@ -91,9 +103,46 @@ Reload, and the nickname, 🦊 and best score are all still there.
 
 ---
 
+## Levels, step 1: level files, level 2, `?level=N`
+**Files:** `levels/level-1.js` (the classic numbers, moved out of `game.js`),
+`levels/level-2.js` (same, but needs more food), `game.js` (`createState(rand,
+level, score)`, per-level speed, going to the next level at the food goal),
+`main.js` (`?level=N`, level and food on the HUD), `index.html` (level scripts
+and HUD), tests
+- Level 1 plays exactly as before, apart from moving on to level 2 after 5 food.
+- `index.html?level=N` starts Start and Play again at level N. Missing or
+  unknown numbers mean level 1. Later level files only need adding to
+  `index.html` and the `LEVELS` list in `game.js`.
+
+**10-second check:** open `index.html`, eat 5 food: the HUD switches to
+Level 2 · Food 0/8 and the score stays. Open `index.html?level=2` and press
+Start: it begins at Level 2. `npm test` passes.
+
+## Levels, step 2: level 2 starts longer
+**Files:** `levels/level-2.js` (one more segment at the tail), tests
+- The head stays at the same place and heads right, so there are still 14
+  free cells ahead before the wall.
+
+**10-second check:** open `index.html?level=2` and press Start: the snake is
+4 squares long and steers normally. `npm test` passes.
+
+## Levels, step 3: obstacles on level 2
+**Files:** `levels/level-2.js` (`obstacles` list), `game.js` (obstacles in the
+state, hitting one ends the game, food skips them), `main.js` (draw them),
+`style.css` (`--obstacle` colour), tests
+- A level without an `obstacles` list has none, so `level-1.js` is unchanged.
+- A test flood-fills from the snake's head to prove every free square can be
+  reached, so a future layout can't wall off part of the board.
+
+**10-second check:** open `index.html?level=2` and press Start: 4 grey blocks
+show, driving into one ends the game, and food never appears on one.
+`npm test` passes.
+
+---
+
 ## Final check (matches intent.md "Done when")
 1. Turn off Wi-Fi and open `index.html` from disk. Set a nickname and avatar.
 2. Play with the keyboard on a laptop, and with touch in DevTools device mode or on a phone.
 3. Reload. The nickname, avatar and best score are still there.
-4. `npm test` passes, and `grep -nE "https?://" index.html style.css game.js main.js`
+4. `npm test` passes, and `grep -nE "https?://" index.html style.css game.js main.js levels/*.js`
    finds no outside links.

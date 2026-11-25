@@ -198,3 +198,147 @@ test("moving right and pressing up then left, one turn per step, does not end th
   s = Snake.step(Snake.turn(s, "left"), first);
   assert.strictEqual(s.over, false);
 });
+
+// ---- Levels ----
+
+const level1 = require("../levels/level-1.js");
+const level2 = require("../levels/level-2.js");
+
+test("level 1 keeps the classic numbers", () => {
+  assert.deepStrictEqual(level1.start, [
+    { x: 5, y: 10 }, { x: 4, y: 10 }, { x: 3, y: 10 }
+  ]);
+  assert.strictEqual(level1.dir, "right");
+  assert.strictEqual(level1.baseMs, 150);
+  assert.strictEqual(level1.speedupEvery, 5);
+  assert.strictEqual(level1.speedupMs, 10);
+  assert.strictEqual(level1.minMs, 70);
+});
+
+test("level 2 needs more food than level 1", () => {
+  assert.ok(level2.foodGoal > level1.foodGoal);
+});
+
+test("createState starts on level 1 by default, or on the level asked for", () => {
+  assert.strictEqual(Snake.createState(first).level, 1);
+  const s = Snake.createState(first, 2);
+  assert.strictEqual(s.level, 2);
+  assert.strictEqual(s.levelFood, 0);
+  assert.strictEqual(s.score, 0);
+  assert.strictEqual(Snake.createState(first, 99).level, 1);
+});
+
+// A state on `level` with the food right ahead and `levelFood` eaten so far.
+function aboutToEat(level, levelFood, score) {
+  const s = Snake.createState(first, level, score);
+  const head = s.snake[0];
+  return Object.assign({}, s, {
+    levelFood,
+    food: { x: head.x + 1, y: head.y }
+  });
+}
+
+test("eating one less than the goal stays on the level", () => {
+  const s = Snake.step(aboutToEat(1, level1.foodGoal - 2, 3), first);
+  assert.strictEqual(s.level, 1);
+  assert.strictEqual(s.levelFood, level1.foodGoal - 1);
+});
+
+test("reaching level 1's food goal starts level 2 and keeps the score", () => {
+  const s = Snake.step(aboutToEat(1, level1.foodGoal - 1, 4), first);
+  assert.strictEqual(s.level, 2);
+  assert.strictEqual(s.levelFood, 0);
+  assert.strictEqual(s.score, 5);
+  assert.strictEqual(s.over, false);
+  assert.deepStrictEqual(s.snake, level2.start);
+});
+
+test("the last level keeps going after its goal", () => {
+  const s = Snake.step(aboutToEat(2, level2.foodGoal - 1, 12), first);
+  assert.strictEqual(s.level, 2);
+  assert.strictEqual(s.levelFood, level2.foodGoal);
+  assert.strictEqual(s.score, 13);
+});
+
+test("speed counts the food eaten on the current level", () => {
+  assert.strictEqual(Snake.stepMs(0, 2), level2.baseMs);
+  assert.strictEqual(Snake.stepMs(5, 2), level2.baseMs - level2.speedupMs);
+});
+
+test("level 2 starts longer than level 1, head in the same place and same way", () => {
+  assert.ok(level2.start.length > level1.start.length);
+  assert.deepStrictEqual(level2.start[0], level1.start[0]);
+  assert.strictEqual(level2.dir, level1.dir);
+  // Every segment is on the board and no two share a cell.
+  const cells = level2.start.map((p) => p.x + "," + p.y);
+  assert.strictEqual(new Set(cells).size, cells.length);
+  level2.start.forEach((p) => {
+    assert.ok(p.x >= 0 && p.y >= 0 && p.x < Snake.GRID && p.y < Snake.GRID);
+  });
+});
+
+// ---- Level 2 obstacles ----
+
+const key = (p) => p.x + "," + p.y;
+
+test("level 1 has no obstacles, level 2 has some, all on the board", () => {
+  assert.deepStrictEqual(Snake.createState(first, 1).obstacles, []);
+  assert.ok(level2.obstacles.length > 0);
+  level2.obstacles.forEach((p) => {
+    assert.ok(p.x >= 0 && p.y >= 0 && p.x < Snake.GRID && p.y < Snake.GRID);
+  });
+});
+
+test("the snake never starts on an obstacle", () => {
+  const blocks = new Set(level2.obstacles.map(key));
+  level2.start.forEach((p) => assert.ok(!blocks.has(key(p)), key(p)));
+});
+
+test("driving into an obstacle ends the game and keeps the score", () => {
+  const s = Object.assign(Snake.createState(first, 2), {
+    snake: [{ x: 3, y: 4 }, { x: 2, y: 4 }, { x: 1, y: 4 }],
+    dir: "right",
+    moved: "right",
+    food: { x: 0, y: 0 },
+    score: 7
+  });
+  const next = Snake.step(s, first);
+  assert.strictEqual(next.over, true);
+  assert.strictEqual(next.score, 7);
+  assert.deepStrictEqual(next.snake, s.snake);
+});
+
+test("spawnFood skips obstacles", () => {
+  // A 2x2 board: the snake on one cell, obstacles on two, one cell free.
+  const food = Snake.spawnFood(
+    [{ x: 0, y: 0 }], 2, first, [{ x: 1, y: 0 }, { x: 0, y: 1 }]
+  );
+  assert.deepStrictEqual(food, { x: 1, y: 1 });
+});
+
+test("food on level 2 never lands on an obstacle", () => {
+  const blocks = new Set(level2.obstacles.map(key));
+  for (let i = 0; i < 400; i++) {
+    const s = Snake.createState(() => i / 400, 2);
+    assert.ok(!blocks.has(key(s.food)), key(s.food));
+  }
+});
+
+test("level 2 is always playable: every free square can be reached from the head", () => {
+  const blocks = new Set(level2.obstacles.map(key));
+  const start = level2.start[0];
+  const seen = new Set([key(start)]);
+  const todo = [start];
+  while (todo.length) {
+    const p = todo.pop();
+    for (const d of Object.values(Snake.DIRS)) {
+      const n = { x: p.x + d.x, y: p.y + d.y };
+      const k = key(n);
+      if (n.x < 0 || n.y < 0 || n.x >= Snake.GRID || n.y >= Snake.GRID) continue;
+      if (blocks.has(k) || seen.has(k)) continue;
+      seen.add(k);
+      todo.push(n);
+    }
+  }
+  assert.strictEqual(seen.size, Snake.GRID * Snake.GRID - blocks.size);
+});

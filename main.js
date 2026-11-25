@@ -11,13 +11,24 @@
   var canvas = $("board");
   var ctx = canvas.getContext("2d");
   var scoreEl = $("score");
+  var levelEl = $("level");
+  var foodEl = $("level-food");
+  var goalEl = $("level-goal");
   var screens = {
     start: $("screen-start"),
     game: $("screen-game"),
     over: $("screen-over")
   };
 
-  var state = Snake.createState();
+  // index.html?level=2 starts straight at level 2, for testing. A missing
+  // or unknown level number means level 1.
+  function startLevelFromUrl() {
+    var n = parseInt(new URLSearchParams(location.search).get("level"), 10);
+    return n >= 1 && n <= Snake.LEVELS.length ? n : 1;
+  }
+
+  var startLevel = startLevelFromUrl();
+  var state = Snake.createState(undefined, startLevel);
   var queue = [];
   var paused = false;
   var screen = "start";
@@ -63,12 +74,12 @@
 
   function startGame() {
     clearTimeout(timer);
-    state = Snake.createState();
+    state = Snake.createState(undefined, startLevel);
     queue = [];
     paused = false;
     showScreen("game");
     draw();
-    timer = setTimeout(tick, Snake.stepMs(state.score));
+    timer = setTimeout(tick, Snake.stepMs(state.levelFood, state.level));
   }
 
   function endGame() {
@@ -102,6 +113,11 @@
     ctx.fillStyle = cssVar("--board");
     ctx.fillRect(0, 0, size, size);
 
+    ctx.fillStyle = cssVar("--obstacle");
+    state.obstacles.forEach(function (block) {
+      ctx.fillRect(block.x * cell, block.y * cell, cell, cell);
+    });
+
     if (state.food) {
       ctx.fillStyle = cssVar("--food");
       ctx.beginPath();
@@ -131,6 +147,9 @@
     }
 
     scoreEl.textContent = state.score;
+    levelEl.textContent = state.level;
+    foodEl.textContent = state.levelFood;
+    goalEl.textContent = Snake.getLevel(state.level).foodGoal;
   }
 
   // ---- Input ----
@@ -210,14 +229,17 @@
     if (screen !== "game") return;
     if (!paused) {
       if (queue.length) state = Snake.turn(state, queue.shift());
+      var levelBefore = state.level;
       state = Snake.step(state);
+      // A new level starts on a fresh board, so old turns no longer apply.
+      if (state.level !== levelBefore) queue = [];
       draw();
       if (state.over) {
         endGame();
         return;
       }
     }
-    timer = setTimeout(tick, Snake.stepMs(state.score));
+    timer = setTimeout(tick, Snake.stepMs(state.levelFood, state.level));
   }
 
   showStart();

@@ -2,12 +2,17 @@
 var Snake = (function () {
   var GRID = 20;
 
-  // Speed: start at BASE_MS per step, get SPEEDUP_MS faster every
-  // SPEEDUP_EVERY pieces of food, never faster than MIN_MS.
-  var BASE_MS = 150;
-  var SPEEDUP_EVERY = 5;
-  var SPEEDUP_MS = 10;
-  var MIN_MS = 70;
+  // The levels, in order. Each one's numbers live in levels/level-N.js.
+  // The browser loads those with <script> tags before this file; Node
+  // loads them with require.
+  var LEVELS = typeof module !== "undefined"
+    ? [require("./levels/level-1.js"), require("./levels/level-2.js")]
+    : [SnakeLevel1, SnakeLevel2];
+
+  // Returns the level with this number, or level 1 if there is none.
+  function getLevel(number) {
+    return LEVELS[number - 1] || LEVELS[0];
+  }
 
   var DIRS = {
     up: { x: 0, y: -1 },
@@ -26,16 +31,21 @@ var Snake = (function () {
     return a.x === b.x && a.y === b.y;
   }
 
-  // Picks a random empty cell for the food. `rand` returns a number in
-  // [0, 1) like Math.random; tests pass their own. Returns null if the
-  // snake fills the whole board.
-  function spawnFood(snake, grid, rand) {
+  function onAny(cells, cell) {
+    return cells.some(function (c) { return sameCell(c, cell); });
+  }
+
+  // Picks a random empty cell for the food: not on the snake and not on an
+  // obstacle. `rand` returns a number in [0, 1) like Math.random; tests
+  // pass their own. Returns null if there is no empty cell left.
+  function spawnFood(snake, grid, rand, obstacles) {
     rand = rand || Math.random;
+    obstacles = obstacles || [];
     var empty = [];
     for (var y = 0; y < grid; y++) {
       for (var x = 0; x < grid; x++) {
         var cell = { x: x, y: y };
-        if (!snake.some(function (part) { return sameCell(part, cell); })) {
+        if (!onAny(snake, cell) && !onAny(obstacles, cell)) {
           empty.push(cell);
         }
       }
@@ -44,19 +54,23 @@ var Snake = (function () {
     return empty[Math.floor(rand() * empty.length)];
   }
 
-  function createState(rand) {
-    var snake = [
-      { x: 5, y: 10 },
-      { x: 4, y: 10 },
-      { x: 3, y: 10 }
-    ];
+  // A fresh board for a level (level 1 if not given or unknown). `score`
+  // is carried over from earlier levels; it starts at 0.
+  function createState(rand, levelNumber, score) {
+    var level = getLevel(levelNumber);
+    var copy = function (part) { return { x: part.x, y: part.y }; };
+    var snake = level.start.map(copy);
+    var obstacles = (level.obstacles || []).map(copy);
     return {
       grid: GRID,
-      dir: "right",   // the way the snake will move on the next step
-      moved: "right", // the way the snake actually moved last
+      level: level.number,
+      levelFood: 0,       // food eaten on this level
+      dir: level.dir,     // the way the snake will move on the next step
+      moved: level.dir,   // the way the snake actually moved last
       snake: snake,
-      food: spawnFood(snake, GRID, rand),
-      score: 0,
+      obstacles: obstacles,
+      food: spawnFood(snake, GRID, rand, obstacles),
+      score: score || 0,
       over: false
     };
   }
@@ -65,10 +79,12 @@ var Snake = (function () {
     return cell.x >= 0 && cell.y >= 0 && cell.x < grid && cell.y < grid;
   }
 
-  // How long one step lasts, in milliseconds, for a given score.
-  function stepMs(score) {
-    var faster = Math.floor(score / SPEEDUP_EVERY) * SPEEDUP_MS;
-    return Math.max(MIN_MS, BASE_MS - faster);
+  // How long one step lasts, in milliseconds, after eating `food` pieces
+  // on a level (level 1 if not given).
+  function stepMs(food, levelNumber) {
+    var level = getLevel(levelNumber);
+    var faster = Math.floor(food / level.speedupEvery) * level.speedupMs;
+    return Math.max(level.minMs, level.baseMs - faster);
   }
 
   // Returns a state heading in the new direction. Unknown directions,
@@ -96,7 +112,7 @@ var Snake = (function () {
     var head = state.snake[0];
     var next = { x: head.x + d.x, y: head.y + d.y };
 
-    if (!inBounds(next, state.grid)) {
+    if (!inBounds(next, state.grid) || onAny(state.obstacles || [], next)) {
       return Object.assign({}, state, { over: true });
     }
 
@@ -110,12 +126,23 @@ var Snake = (function () {
     }
 
     if (eats) {
+      var levelFood = state.levelFood + 1;
+      var score = state.score + 1;
+
+      // Reached the food goal and there is a next level: start it, keeping
+      // the score. On the last level the game just keeps going.
+      var hasNext = state.level < LEVELS.length;
+      if (hasNext && levelFood >= getLevel(state.level).foodGoal) {
+        return createState(rand, state.level + 1, score);
+      }
+
       var grown = [next].concat(state.snake);
       return Object.assign({}, state, {
         moved: state.dir,
         snake: grown,
-        food: spawnFood(grown, state.grid, rand),
-        score: state.score + 1
+        food: spawnFood(grown, state.grid, rand, state.obstacles),
+        score: score,
+        levelFood: levelFood
       });
     }
 
@@ -127,8 +154,10 @@ var Snake = (function () {
 
   return {
     GRID: GRID,
-    BASE_MS: BASE_MS,
-    MIN_MS: MIN_MS,
+    BASE_MS: LEVELS[0].baseMs,
+    MIN_MS: LEVELS[0].minMs,
+    LEVELS: LEVELS,
+    getLevel: getLevel,
     DIRS: DIRS,
     isOpposite: isOpposite,
     spawnFood: spawnFood,

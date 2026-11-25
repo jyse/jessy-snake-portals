@@ -16,7 +16,11 @@
     </section>
 
     <section id="screen-game" class="screen" hidden>
-      <p class="hud">Score <span id="score" aria-live="polite">0</span></p>
+      <p class="hud">
+        Level <span id="level">1</span> ·
+        Food <span id="level-food">0</span>/<span id="level-goal">5</span> ·
+        Score <span id="score" aria-live="polite">0</span>
+      </p>
       <canvas id="board" width="400" height="400" aria-label="Snake game board"></canvas>
       <div class="pad" aria-label="Direction buttons">
         <button type="button" class="up" data-dir="up" aria-label="Up">▲</button>
@@ -38,6 +42,8 @@
       </div>
     </section>
   </main>
+  <script src="levels/level-1.js"></script>
+  <script src="levels/level-2.js"></script>
   <script src="game.js"></script>
   <script src="main.js"></script>
 </body>
