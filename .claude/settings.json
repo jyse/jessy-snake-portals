@@ -1,10 +1,15 @@
 {
   "permissions": {
+    "allow": [
+      "Bash(npm test)"
+    ],
     "ask": [
       "Bash(git commit)",
       "Bash(git commit *)",
       "Bash(git push)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Edit(tests/**)",
+      "Write(tests/**)"
     ],
     "deny": [
       "Bash(git push --force*)",
