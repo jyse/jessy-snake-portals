@@ -52,7 +52,8 @@ var Snake = (function () {
     ];
     return {
       grid: GRID,
-      dir: "right",
+      dir: "right",   // the way the snake will move on the next step
+      moved: "right", // the way the snake actually moved last
       snake: snake,
       food: spawnFood(snake, GRID, rand),
       score: 0,
@@ -72,9 +73,13 @@ var Snake = (function () {
 
   // Returns a state heading in the new direction. Unknown directions,
   // the same direction, and reversing straight back into the body are
-  // ignored (the original state is returned).
+  // ignored (the original state is returned). "Straight back" is checked
+  // against the way the snake last moved, not the last key, so two quick
+  // turns before a step (e.g. up then left while moving right) can't
+  // send it into its own neck.
   function turn(state, dir) {
-    if (!DIRS[dir] || dir === state.dir || isOpposite(dir, state.dir)) {
+    var moved = state.moved || state.dir;
+    if (!DIRS[dir] || dir === state.dir || isOpposite(dir, moved)) {
       return state;
     }
     return Object.assign({}, state, { dir: dir });
@@ -107,6 +112,7 @@ var Snake = (function () {
     if (eats) {
       var grown = [next].concat(state.snake);
       return Object.assign({}, state, {
+        moved: state.dir,
         snake: grown,
         food: spawnFood(grown, state.grid, rand),
         score: state.score + 1
@@ -114,6 +120,7 @@ var Snake = (function () {
     }
 
     return Object.assign({}, state, {
+      moved: state.dir,
       snake: [next].concat(state.snake.slice(0, -1))
     });
   }

@@ -173,3 +173,28 @@ test("a finished game does not change", () => {
   const s = Object.assign(Snake.createState(first), { over: true });
   assert.strictEqual(Snake.step(s, first), s);
 });
+
+// ---- Rule: a quick reverse must never end the game ----
+
+test("moving right and pressing left does not end the game", () => {
+  let s = Snake.createState(first); // heading right
+  s = Snake.turn(s, "left");
+  s = Snake.step(s, first);
+  assert.strictEqual(s.over, false);
+  assert.strictEqual(s.dir, "right");
+});
+
+test("moving right and pressing up then left very fast (before the next step) does not end the game", () => {
+  let s = Snake.createState(first); // heading right
+  s = Snake.turn(s, "up");
+  s = Snake.turn(s, "left"); // pressed before the snake has moved up
+  s = Snake.step(s, first);
+  assert.strictEqual(s.over, false);
+});
+
+test("moving right and pressing up then left, one turn per step, does not end the game", () => {
+  let s = Snake.createState(first); // heading right
+  s = Snake.step(Snake.turn(s, "up"), first);
+  s = Snake.step(Snake.turn(s, "left"), first);
+  assert.strictEqual(s.over, false);
+});
