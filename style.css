@@ -2,14 +2,14 @@
   --bg: #0f1f17;
   --text: #e4f2e8;
   --board: #16301f;
-  --snake: #5cc97a;
-  --snake-head: #b6f2c4;
-  --food: #f2a65a;
+  --snake: #c21ce8;
+  --snake-head: #10ed44;
+  --food: #25ffcc;
   --obstacle: #6f7a72;
   --overlay: rgba(15, 31, 23, 0.7);
-  --button: #24472f;
-  --button-active: #3a6b4a;
-  --muted: #9bb8a4;
+  --button: #1d2bc5;
+  --button-active: #096d2b;
+  --muted: #10ed56;
 }
 
 * {
@@ -25,7 +25,11 @@ body {
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -191,10 +195,18 @@ button:focus-visible {
   background: var(--button-active);
 }
 
-.pad .up { grid-area: up; }
-.pad .down { grid-area: down; }
-.pad .left { grid-area: left; }
-.pad .right { grid-area: right; }
+.pad .up {
+  grid-area: up;
+}
+.pad .down {
+  grid-area: down;
+}
+.pad .left {
+  grid-area: left;
+}
+.pad .right {
+  grid-area: right;
+}
 
 @media (pointer: coarse) {
   .pad {
