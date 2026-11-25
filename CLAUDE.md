@@ -1,9 +1,9 @@
 # Snake
 
-A Snake game in plain HTML, CSS and JavaScript. Read @intent.md for what we're building.
+A Snake game in plain HTML, CSS and JavaScript. What we're building is in intent.md.
 
 ## Build plan
-Follow @PLAN.md. It splits the work into 5 layers.
+Follow @PLAN.md. It splits the work into layers.
 - Build only the layer asked for, one at a time.
 - Each layer must end with its 10-second check working and `npm test` passing.
 - After finishing a layer, update its row in the Status table in PLAN.md.
