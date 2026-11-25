@@ -15,6 +15,8 @@ you can open and check in about 10 seconds. Build one layer at a time.
 | L2b | Level 2: snake starts 4 long | Done (branch `level-2`) |
 | L2c | Level 2: obstacles | Done (branch `level-2`) |
 | L3a | Level 3: food goal 11 | Done (branch `level-3`) |
+| L3b | Level 3: snake starts 5 long, 140 ms | Done (branch `level-3`) |
+| L3c | Level 3: 24 obstacle squares | Done (branch `level-3`) |
 
 ## File layout
 ```
@@ -44,13 +46,14 @@ tests/game.test.js   unit tests for game.js using Node's built-in test runner
   our own colours.
 - **Reset:** a small "Reset best score" link on the start screen
 - **Levels (so far):** level 1 needs 5 food, level 2 needs 8, level 3 needs 11. Level 1's
-  snake starts 3 long, level 2's starts 4 long (head in the same place).
+  snake starts 3 long, level 2's 4 long, level 3's 5 long (head in the same place). Level 3 starts at 140 ms per step instead of 150.
   Level 1 has no obstacles; level 2 has four 2×2 grey blocks, one per
   quarter, kept off the walls, each other and the snake's row so every free
-  square stays reachable. The food counts
+  square stays reachable. Level 3 adds two more 2×2 blocks in the middle
+  columns, top and bottom: six blocks, 24 squares. The food counts
   per level; the score carries over. A new level starts on a fresh board (the
   snake goes back to its start). After the last level's goal you keep playing.
-  No "Level 2!" message yet. Still open: obstacles, levels 3 to 5, a win screen.
+  No "Level 2!" message yet. Still open: levels 4 and 5, a win screen.
 
 ---
 

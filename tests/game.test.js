@@ -360,3 +360,67 @@ test("food on level 3 never lands on an obstacle", () => {
     assert.ok(!blocks.has(key(s.food)), key(s.food));
   }
 });
+
+// ---- Level 3 snake ----
+
+test("level 3 starts longer than level 2, head in the same place and same way", () => {
+  assert.ok(level3.start.length > level2.start.length);
+  assert.deepStrictEqual(level3.start[0], level2.start[0]);
+  assert.strictEqual(level3.dir, level2.dir);
+  const cells = level3.start.map(key);
+  assert.strictEqual(new Set(cells).size, cells.length);
+  level3.start.forEach((p) => {
+    assert.ok(p.x >= 0 && p.y >= 0 && p.x < Snake.GRID && p.y < Snake.GRID);
+  });
+});
+
+test("the snake never starts on an obstacle on level 3", () => {
+  const blocks = new Set(level3.obstacles.map(key));
+  level3.start.forEach((p) => assert.ok(!blocks.has(key(p)), key(p)));
+});
+
+test("level 3 starts faster than level 2", () => {
+  assert.ok(level3.baseMs < level2.baseMs);
+  assert.ok(level3.baseMs >= 90 && level3.baseMs <= 150);
+  assert.ok(level3.baseMs > level3.minMs);
+});
+
+// ---- Level 3 obstacles ----
+
+test("level 3 has more obstacles than level 2, at most 40", () => {
+  assert.ok(level3.obstacles.length > level2.obstacles.length);
+  assert.ok(level3.obstacles.length <= 40);
+  const cells = level3.obstacles.map(key);
+  assert.strictEqual(new Set(cells).size, cells.length);
+  level3.obstacles.forEach((p) => {
+    assert.ok(p.x >= 0 && p.y >= 0 && p.x < Snake.GRID && p.y < Snake.GRID);
+  });
+});
+
+test("level 3's obstacles keep 2 free squares from the walls and stay off the snake's row", () => {
+  const row = level3.start[0].y;
+  level3.obstacles.forEach((p) => {
+    assert.ok(p.x >= 2 && p.y >= 2, key(p));
+    assert.ok(p.x <= Snake.GRID - 3 && p.y <= Snake.GRID - 3, key(p));
+    assert.notStrictEqual(p.y, row, key(p));
+  });
+});
+
+test("level 3 is always playable: every free square can be reached from the head", () => {
+  const blocks = new Set(level3.obstacles.map(key));
+  const start = level3.start[0];
+  const seen = new Set([key(start)]);
+  const todo = [start];
+  while (todo.length) {
+    const p = todo.pop();
+    for (const d of Object.values(Snake.DIRS)) {
+      const n = { x: p.x + d.x, y: p.y + d.y };
+      const k = key(n);
+      if (n.x < 0 || n.y < 0 || n.x >= Snake.GRID || n.y >= Snake.GRID) continue;
+      if (blocks.has(k) || seen.has(k)) continue;
+      seen.add(k);
+      todo.push(n);
+    }
+  }
+  assert.strictEqual(seen.size, Snake.GRID * Snake.GRID - blocks.size);
+});
