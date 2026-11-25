@@ -14,6 +14,7 @@ you can open and check in about 10 seconds. Build one layer at a time.
 | L2 | Levels: level files, level 2, `?level=N` | Done (branch `level-2`) |
 | L2b | Level 2: snake starts 4 long | Done (branch `level-2`) |
 | L2c | Level 2: obstacles | Done (branch `level-2`) |
+| L3a | Level 3: food goal 11 | Done (branch `level-3`) |
 
 ## File layout
 ```
@@ -42,7 +43,7 @@ tests/game.test.js   unit tests for game.js using Node's built-in test runner
 - **Board:** fixed 20×20 grid, scaled to fit the screen. Dark green theme with
   our own colours.
 - **Reset:** a small "Reset best score" link on the start screen
-- **Levels (so far):** level 1 needs 5 food, level 2 needs 8. Level 1's
+- **Levels (so far):** level 1 needs 5 food, level 2 needs 8, level 3 needs 11. Level 1's
   snake starts 3 long, level 2's starts 4 long (head in the same place).
   Level 1 has no obstacles; level 2 has four 2×2 grey blocks, one per
   quarter, kept off the walls, each other and the snake's row so every free

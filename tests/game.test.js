@@ -203,6 +203,7 @@ test("moving right and pressing up then left, one turn per step, does not end th
 
 const level1 = require("../levels/level-1.js");
 const level2 = require("../levels/level-2.js");
+const level3 = require("../levels/level-3.js");
 
 test("level 1 keeps the classic numbers", () => {
   assert.deepStrictEqual(level1.start, [
@@ -254,10 +255,19 @@ test("reaching level 1's food goal starts level 2 and keeps the score", () => {
 });
 
 test("the last level keeps going after its goal", () => {
-  const s = Snake.step(aboutToEat(2, level2.foodGoal - 1, 12), first);
-  assert.strictEqual(s.level, 2);
-  assert.strictEqual(s.levelFood, level2.foodGoal);
+  const last = Snake.LEVELS[Snake.LEVELS.length - 1];
+  const s = Snake.step(aboutToEat(last.number, last.foodGoal - 1, 12), first);
+  assert.strictEqual(s.level, last.number);
+  assert.strictEqual(s.levelFood, last.foodGoal);
   assert.strictEqual(s.score, 13);
+});
+
+test("reaching level 2's food goal starts level 3 and keeps the score", () => {
+  const s = Snake.step(aboutToEat(2, level2.foodGoal - 1, 12), first);
+  assert.strictEqual(s.level, 3);
+  assert.strictEqual(s.levelFood, 0);
+  assert.strictEqual(s.score, 13);
+  assert.deepStrictEqual(s.snake, level3.start);
 });
 
 test("speed counts the food eaten on the current level", () => {
@@ -341,4 +351,12 @@ test("level 2 is always playable: every free square can be reached from the head
     }
   }
   assert.strictEqual(seen.size, Snake.GRID * Snake.GRID - blocks.size);
+});
+
+test("food on level 3 never lands on an obstacle", () => {
+  const blocks = new Set(level3.obstacles.map(key));
+  for (let i = 0; i < 400; i++) {
+    const s = Snake.createState(() => i / 400, 3);
+    assert.ok(!blocks.has(key(s.food)), key(s.food));
+  }
 });

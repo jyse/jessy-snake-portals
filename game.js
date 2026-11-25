@@ -6,8 +6,12 @@ var Snake = (function () {
   // The browser loads those with <script> tags before this file; Node
   // loads them with require.
   var LEVELS = typeof module !== "undefined"
-    ? [require("./levels/level-1.js"), require("./levels/level-2.js")]
-    : [SnakeLevel1, SnakeLevel2];
+    ? [
+        require("./levels/level-1.js"),
+        require("./levels/level-2.js"),
+        require("./levels/level-3.js")
+      ]
+    : [SnakeLevel1, SnakeLevel2, SnakeLevel3];
 
   // Returns the level with this number, or level 1 if there is none.
   function getLevel(number) {
