@@ -42,13 +42,15 @@ too. They're outside `levels/`, so they need the usual permission:
 - New length = level N-1's `start` length + 1 (level 2 went from 3 to 4).
 - It must be longer than level N-1's and inside spec.md's limits (2 to 8
   squares). If level N-1 is already at 8, stop and tell the user.
-- Keep the head where level N-1 has it, and keep `dir`. Add the new square at
+- Keep `dir`, and keep the head where level N-1 has it. Add the new square at
   the tail end, carrying on the straight line away from the head.
-- The new square must be on the board and not on an obstacle. If it would hit
-  a wall or a block, stop and tell the user rather than moving the snake
-  somewhere else.
-- Because the head and `dir` don't move, the clear space ahead stays the same.
-  Check it's still at least 5 squares anyway.
+- If that tail square would be off the board, slide the whole snake one
+  square forward (in `dir`) instead: the head moves one square and the tail
+  stays on the board. Only do this if every square is on the board and not on
+  a block, and at least 5 clear squares stay ahead of the head. Otherwise stop
+  and tell the user.
+- If the new square would land on a block, stop and tell the user.
+- Check the clear space ahead is still at least 5 squares.
 
 ## 5. Pick the speed
 - New `baseMs` = level N-1's `baseMs` − 10 (lower is faster).
