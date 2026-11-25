@@ -9,7 +9,9 @@
       "Bash(git push)",
       "Bash(git push *)",
       "Edit(tests/**)",
-      "Write(tests/**)"
+      "Write(tests/**)",
+      "Edit(spec.md)",
+      "Write(spec.md)"
     ],
     "deny": [
       "Bash(git push --force*)",
