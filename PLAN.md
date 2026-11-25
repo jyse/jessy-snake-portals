@@ -22,6 +22,7 @@ style.css       look and layout, fits phone and laptop
 game.js         pure game logic (no DOM): state, step, turn, food, collisions, speed
 main.js         DOM glue: drawing on <canvas>, input, screens, localStorage
 levels/level-N.js   one level's numbers: food goal, start snake, speed
+spec.md         rules for level files: every value with its min and max
 package.json    only "test": "node --test tests/*.test.js", no dependencies
 tests/game.test.js   unit tests for game.js using Node's built-in test runner
 ```
