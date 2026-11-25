@@ -22,7 +22,7 @@ var SnakeLevel3 = {
     { x: 9, y: 14 },  { x: 10, y: 14 }, { x: 9, y: 15 },  { x: 10, y: 15 },
     { x: 14, y: 14 }, { x: 15, y: 14 }, { x: 14, y: 15 }, { x: 15, y: 15 }
   ],
-  baseMs: 140,
+  baseMs: 130,
   speedupEvery: 5,
   speedupMs: 10,
   minMs: 70

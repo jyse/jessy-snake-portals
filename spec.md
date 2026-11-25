@@ -30,7 +30,7 @@ It's based on `levels/level-1.js`, `levels/level-2.js` and the Levels wish in
 | `foodGoal` | food to eat on this level to go to the next | 1 | 30 | 5 | 8 |
 | `start` | the snake's squares, head first | 2 squares | 8 squares | 3 | 4 |
 | `dir` | the way the snake moves first | `up`, `down`, `left` or `right` | | `right` | `right` |
-| `baseMs` | milliseconds per step at the start (lower = faster) | 90 | 150 | 150 | 150 |
+| `baseMs` | milliseconds per step at the start (lower = faster) | 90 | 150 | 150 | 140 |
 | `speedupEvery` | food eaten between speed-ups | 3 | 10 | 5 | 5 |
 | `speedupMs` | milliseconds faster after each speed-up | 0 | 20 | 10 | 10 |
 | `minMs` | top speed: milliseconds per step, never lower | 70 | 70 | 70 | 70 |
@@ -86,16 +86,13 @@ From the Levels wish in intent.md. Level N compared with level N−1:
 | `foodGoal` | higher |
 | `start` | longer |
 | `obstacles` | more squares |
-| `baseMs` | lower or equal ("a bit faster") |
-
-**Known gap:** level 2's `baseMs` is 150, the same as level 1. That's allowed by
-the "lower or equal" rule, but level 2 doesn't start faster yet, as intent.md
-asks. Lowering it (for example to 140) is a change for a later layer.
+| `baseMs` | lower ("a bit faster") |
 
 ## 5. Example: level-2.js
 
 ```js
-// Level 2: like level 1, but needs more food and the snake starts longer.
+// Level 2: like level 1, but needs more food and the snake starts longer and
+// a bit faster.
 var SnakeLevel2 = {
   number: 2,
   foodGoal: 8,
@@ -115,7 +112,7 @@ var SnakeLevel2 = {
     { x: 4, y: 14 },  { x: 5, y: 14 },  { x: 4, y: 15 },  { x: 5, y: 15 },
     { x: 14, y: 14 }, { x: 15, y: 14 }, { x: 14, y: 15 }, { x: 15, y: 15 }
   ],
-  baseMs: 150,
+  baseMs: 140,
   speedupEvery: 5,
   speedupMs: 10,
   minMs: 70
@@ -149,7 +146,7 @@ if (typeof module !== "undefined") module.exports = SnakeLevel2;
 
 How it meets the spec:
 - **Limits:** every value is inside its min and max: 8 food, 4 squares long,
-  150 ms, a speed-up every 5 food by 10 ms, top speed 70, 16 block squares.
+  140 ms, a speed-up every 5 food by 10 ms, top speed 70, 16 block squares.
 - **Start:** a straight line on row 10, head at x=5, body to its left, `dir`
   right, so it moves away from its body.
 - **Clear space ahead:** 14 squares (x=6 to x=19), well over the 5 needed.
@@ -158,7 +155,7 @@ How it meets the spec:
 - **Reachable:** every free square can be reached, and a test checks this.
 - **Room to grow:** 4 + 8 = 12 squares out of 384 free.
 - **Harder than level 1:** more food (8 > 5), longer start (4 > 3), more
-  blocks (16 > 0). Same start speed (150), see the known gap above.
+  blocks (16 > 0), faster start (140 < 150).
 
 ## 6. Template for a new level
 
@@ -176,7 +173,7 @@ var SnakeLevelN = {
   dir: "right",           // points away from the body
   obstacles: [            // 0 to 40 squares, more than level N-1; 2+ free
   ],                      // squares from walls and between blocks
-  baseMs: 150,            // 90 to 150, lower or equal to level N-1
+  baseMs: 150,            // 90 to 150, lower than level N-1
   speedupEvery: 5,        // 3 to 10
   speedupMs: 10,          // 0 to 20
   minMs: 70               // always 70

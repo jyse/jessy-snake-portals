@@ -46,7 +46,7 @@ tests/game.test.js   unit tests for game.js using Node's built-in test runner
   our own colours.
 - **Reset:** a small "Reset best score" link on the start screen
 - **Levels (so far):** level 1 needs 5 food, level 2 needs 8, level 3 needs 11. Level 1's
-  snake starts 3 long, level 2's 4 long, level 3's 5 long (head in the same place). Level 3 starts at 140 ms per step instead of 150.
+  snake starts 3 long, level 2's 4 long, level 3's 5 long (head in the same place). Level 2 starts at 140 ms per step, level 3 at 130 (level 1 stays 150).
   Level 1 has no obstacles; level 2 has four 2×2 grey blocks, one per
   quarter, kept off the walls, each other and the snake's row so every free
   square stays reachable. Level 3 adds two more 2×2 blocks in the middle

@@ -250,8 +250,8 @@ files.forEach((f, i) => {
         obstacles.length + " vs " + obstaclesOf(prev).length);
     });
 
-    test(name + "starts as fast as or faster than " + was, () => {
-      assert.ok(level.baseMs <= prev.baseMs, level.baseMs + " ms vs " + prev.baseMs + " ms");
+    test(name + "starts faster than " + was, () => {
+      assert.ok(level.baseMs < prev.baseMs, level.baseMs + " ms vs " + prev.baseMs + " ms");
     });
   }
 });
