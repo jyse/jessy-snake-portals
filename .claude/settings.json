@@ -33,6 +33,18 @@
     ]
   },
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "branch=$(git -C \"$CLAUDE_PROJECT_DIR\" branch --show-current 2>/dev/null); if [ \"$branch\" = \"main\" ]; then echo 'Make a branch first.' >&2; exit 2; fi",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Edit|Write|MultiEdit|NotebookEdit",
