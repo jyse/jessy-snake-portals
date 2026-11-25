@@ -1,14 +1,93 @@
-// DOM glue: drawing, input and the game loop.
+// DOM glue: screens, drawing, input, the game loop and saved best score.
 (function () {
   var MAX_QUEUE = 2;      // turns remembered between steps
   var SWIPE_MIN_PX = 20;  // shorter finger moves are ignored
+  var BEST_KEY = "snake.best";
 
-  var canvas = document.getElementById("board");
+  function $(id) {
+    return document.getElementById(id);
+  }
+
+  var canvas = $("board");
   var ctx = canvas.getContext("2d");
-  var scoreEl = document.getElementById("score");
+  var scoreEl = $("score");
+  var screens = {
+    start: $("screen-start"),
+    game: $("screen-game"),
+    over: $("screen-over")
+  };
+
   var state = Snake.createState();
   var queue = [];
   var paused = false;
+  var screen = "start";
+  var timer = null;
+
+  // ---- Saved best score (stays in this browser only) ----
+
+  // localStorage can be missing or blocked (private windows, strict
+  // settings), so reads and writes never let an error stop the game.
+  function loadBest() {
+    try {
+      var n = parseInt(localStorage.getItem(BEST_KEY), 10);
+      return n > 0 ? n : 0;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  function saveBest(n) {
+    try {
+      localStorage.setItem(BEST_KEY, String(n));
+    } catch (e) {
+      // Not saved; the game still works.
+    }
+  }
+
+  var best = loadBest();
+
+  // ---- Screens ----
+
+  function showScreen(name) {
+    screen = name;
+    Object.keys(screens).forEach(function (key) {
+      screens[key].hidden = key !== name;
+    });
+  }
+
+  function showStart() {
+    $("start-best").textContent = best;
+    showScreen("start");
+    $("start-btn").focus();
+  }
+
+  function startGame() {
+    clearTimeout(timer);
+    state = Snake.createState();
+    queue = [];
+    paused = false;
+    showScreen("game");
+    draw();
+    timer = setTimeout(tick, Snake.stepMs(state.score));
+  }
+
+  function endGame() {
+    clearTimeout(timer);
+    var isNewBest = state.score > best;
+    if (isNewBest) {
+      best = state.score;
+      saveBest(best);
+    }
+    $("over-score").textContent = state.score;
+    $("over-best").textContent = best;
+    $("new-best").hidden = !isNewBest;
+    showScreen("over");
+    $("again-btn").focus();
+  }
+
+  $("start-btn").addEventListener("click", startGame);
+  $("again-btn").addEventListener("click", startGame);
+  $("home-btn").addEventListener("click", showStart);
 
   // ---- Drawing ----
 
@@ -60,7 +139,7 @@
   // so a quick "up, left" while heading right gives two clean turns, and
   // a reverse or a repeat never takes up a slot.
   function queueTurn(dir) {
-    if (paused) return;
+    if (screen !== "game" || paused) return;
     var last = queue.length ? queue[queue.length - 1] : state.dir;
     if (dir === last || Snake.isOpposite(dir, last)) return;
     if (queue.length < MAX_QUEUE) queue.push(dir);
@@ -79,7 +158,9 @@
   };
 
   document.addEventListener("keydown", function (e) {
-    if (e.key === " " || e.key === "p" || e.key === "P") {
+    // Outside a game, leave keys alone so Enter/Space press the buttons.
+    if (screen !== "game") return;
+    if (e.key === " "|| e.key === "p" || e.key === "P") {
       e.preventDefault();
       if (!e.repeat) togglePause();
       return;
@@ -126,14 +207,18 @@
   // setTimeout instead of setInterval so each step can use the current
   // speed, which gets faster as the score goes up.
   function tick() {
+    if (screen !== "game") return;
     if (!paused) {
       if (queue.length) state = Snake.turn(state, queue.shift());
       state = Snake.step(state);
       draw();
+      if (state.over) {
+        endGame();
+        return;
+      }
     }
-    setTimeout(tick, Snake.stepMs(state.score));
+    timer = setTimeout(tick, Snake.stepMs(state.score));
   }
 
-  draw();
-  setTimeout(tick, Snake.stepMs(state.score));
+  showStart();
 })();

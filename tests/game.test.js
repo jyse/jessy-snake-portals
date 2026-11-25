@@ -14,11 +14,12 @@ function stateWithFoodAhead() {
 
 // ---- Layer 1: moving ----
 
-test("createState gives a 3-segment snake facing right, score 0", () => {
+test("createState gives a 3-segment snake facing right, score 0, not over", () => {
   const s = Snake.createState();
   assert.strictEqual(s.snake.length, 3);
   assert.strictEqual(s.dir, "right");
   assert.strictEqual(s.score, 0);
+  assert.strictEqual(s.over, false);
 });
 
 test("step moves the head one cell and keeps the length", () => {
@@ -35,12 +36,6 @@ test("step does not change the input state", () => {
   assert.strictEqual(JSON.stringify(s), before);
 });
 
-test("leaving the board restarts the game (until layer 4)", () => {
-  const s = Snake.createState(first);
-  s.snake[0] = { x: s.grid - 1, y: 10 };
-  s.score = 7;
-  assert.deepStrictEqual(Snake.step(s, first), Snake.createState(first));
-});
 
 // ---- Layer 2: turning ----
 
@@ -131,4 +126,50 @@ test("speed goes up every 5 pieces of food and stops at the maximum", () => {
   assert.strictEqual(Snake.stepMs(5), Snake.BASE_MS - 10);
   assert.strictEqual(Snake.stepMs(10), Snake.BASE_MS - 20);
   assert.strictEqual(Snake.stepMs(1000), Snake.MIN_MS);
+});
+
+// ---- Layer 4: game over ----
+
+// Builds a state from a list of [x, y] cells (head first), with the food
+// out of the way in the top-left corner.
+function stateFrom(cells, dir) {
+  return Object.assign(Snake.createState(first), {
+    snake: cells.map(([x, y]) => ({ x, y })),
+    dir,
+    food: { x: 0, y: 0 },
+    score: 4
+  });
+}
+
+test("hitting a wall ends the game and keeps the snake and score", () => {
+  const s = stateFrom([[19, 10], [18, 10], [17, 10]], "right");
+  const next = Snake.step(s, first);
+  assert.strictEqual(next.over, true);
+  assert.deepStrictEqual(next.snake, s.snake);
+  assert.strictEqual(next.score, 4);
+});
+
+test("every wall ends the game", () => {
+  assert.ok(Snake.step(stateFrom([[0, 5], [1, 5]], "left"), first).over);
+  assert.ok(Snake.step(stateFrom([[5, 0], [5, 1]], "up"), first).over);
+  assert.ok(Snake.step(stateFrom([[5, 19], [5, 18]], "down"), first).over);
+});
+
+test("hitting its own body ends the game", () => {
+  // Head at (5,5); turning right runs into (6,5), which is body, not tail.
+  const s = stateFrom([[5, 5], [5, 6], [6, 6], [6, 5], [6, 4]], "right");
+  assert.strictEqual(Snake.step(s, first).over, true);
+});
+
+test("moving into the cell the tail is leaving is allowed", () => {
+  // A 2x2 loop: the head moves down into where the tail was.
+  const s = stateFrom([[5, 5], [6, 5], [6, 6], [5, 6]], "down");
+  const next = Snake.step(s, first);
+  assert.strictEqual(next.over, false);
+  assert.deepStrictEqual(next.snake[0], { x: 5, y: 6 });
+});
+
+test("a finished game does not change", () => {
+  const s = Object.assign(Snake.createState(first), { over: true });
+  assert.strictEqual(Snake.step(s, first), s);
 });

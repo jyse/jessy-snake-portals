@@ -54,6 +54,98 @@ h1 {
   touch-action: none; /* swipes steer the snake instead of scrolling */
 }
 
+/* ---- Screens ---- */
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+/* `hidden` must win over the display: flex above. */
+.screen[hidden],
+[hidden] {
+  display: none !important;
+}
+
+.panel {
+  max-width: 360px;
+  padding: 24px 16px;
+  border-radius: 12px;
+  background: var(--board);
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.big-stat,
+.stat {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.big-stat {
+  font-size: 1.4rem;
+}
+
+.big-stat span,
+.stat span {
+  font-weight: bold;
+  color: var(--food);
+}
+
+.new-best {
+  margin: 0;
+  font-weight: bold;
+  color: var(--snake-head);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+.actions button,
+.primary {
+  min-height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--button);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary {
+  background: var(--snake);
+  color: var(--bg);
+}
+
+.actions button:hover,
+.actions button:focus-visible {
+  background: var(--button-active);
+}
+
+.primary:hover,
+.primary:focus-visible {
+  background: var(--snake-head);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--snake-head);
+  outline-offset: 2px;
+}
+
+/* ---- Game screen ---- */
+
 .hud {
   margin: 0;
   font-size: 1.1rem;

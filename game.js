@@ -55,7 +55,8 @@ var Snake = (function () {
       dir: "right",
       snake: snake,
       food: spawnFood(snake, GRID, rand),
-      score: 0
+      score: 0,
+      over: false
     };
   }
 
@@ -81,17 +82,27 @@ var Snake = (function () {
 
   // Returns a new state one step later. The input state is not changed.
   // Eating the food grows the snake by one and adds one to the score.
-  // Layer 1-3: leaving the board just restarts the game.
+  // Hitting a wall or the snake's own body ends the game: the snake stays
+  // where it was and `over` becomes true. A finished game never changes.
   function step(state, rand) {
+    if (state.over) return state;
+
     var d = DIRS[state.dir];
     var head = state.snake[0];
     var next = { x: head.x + d.x, y: head.y + d.y };
 
     if (!inBounds(next, state.grid)) {
-      return createState(rand);
+      return Object.assign({}, state, { over: true });
     }
 
     var eats = state.food !== null && sameCell(next, state.food);
+
+    // The tail moves out of the way this step unless the snake is growing,
+    // so moving into the cell the tail is leaving is allowed.
+    var body = eats ? state.snake : state.snake.slice(0, -1);
+    if (body.some(function (part) { return sameCell(part, next); })) {
+      return Object.assign({}, state, { over: true });
+    }
 
     if (eats) {
       var grown = [next].concat(state.snake);
